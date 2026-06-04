@@ -54,6 +54,8 @@ services:
       context: ./api
     container_name: ailapyu_api
     env_file: .env
+    environment:
+      OLLAMA_HOST: "${OLLAMA_INTERNAL_URL}"
     ports:
       - "${API_PORT:-8000}:8000"
     restart: unless-stopped
