@@ -31,13 +31,7 @@ async def chat(req: ChatRequest, request: Request):
 
     history = await fetch_history(pool)
 
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
-
-    # --- THIS WRITES DIRECTLY TO A FILE ---
-    with open("llama_debug.log", "a", encoding="utf-8") as f:
-        f.write("\n================ NEW CHAT REQUEST ================\n")
-        f.write(json.dumps(messages, indent=2))
-        f.write("\n==================================================\n")
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history 
 
     reply = await chat_completion(messages)
 
