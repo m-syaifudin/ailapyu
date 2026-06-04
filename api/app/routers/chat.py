@@ -29,10 +29,14 @@ async def chat(req: ChatRequest, request: Request):
     await save_message(pool, "user", req.message)
 
     history = await fetch_history(pool)
-    print(
-        f"\n--- [DATABASE HISTORY (Raw)] ---\n{json.dumps(history, indent=2)}"
-    )
+
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
+
+    # Log the complete array as a clean JSON block
+    logger.info(
+        "Sending conversation payload to Llama:\n%s",
+        json.dumps(messages, indent=2),
+    )
 
     reply = await chat_completion(messages)
 
