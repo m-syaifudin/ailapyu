@@ -29,6 +29,9 @@ async def chat(req: ChatRequest, request: Request):
     await save_message(pool, "user", req.message)
 
     history = await fetch_history(pool)
+    print(
+        f"\n--- [DATABASE HISTORY (Raw)] ---\n{json.dumps(history, indent=2)}"
+    )
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
 
     reply = await chat_completion(messages)
