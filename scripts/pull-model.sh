@@ -12,7 +12,7 @@ if [ -f .env ]; then
   export $(grep -v '^\s*#' .env | grep -v '^\s*$' | xargs)
 fi
 
-MODEL="${1:-${DEFAULT_MODEL:-llama3.1:8b}}"
+MODEL="${1:-${DEFAULT_MODEL:-llama3.2:3b}}"
 PORT="${OLLAMA_PORT:-11434}"
 
 echo "Pulling model: ${MODEL} …"

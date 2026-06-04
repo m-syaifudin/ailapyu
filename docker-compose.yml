@@ -41,8 +41,8 @@ services:
       - |
         echo '>>> Waiting for Ollama...'
         until ollama list > /dev/null 2>&1; do sleep 2; done
-        echo '>>> Pulling model: ${DEFAULT_MODEL:-llama3.1:8b}...'
-        ollama pull ${DEFAULT_MODEL:-llama3.1:8b}
+        echo '>>> Pulling model: ${DEFAULT_MODEL:-llama3.2:3b}...'
+        ollama pull ${DEFAULT_MODEL:-llama3.2:3b}
         echo '>>> Model ready.'
     environment:
       OLLAMA_HOST: "http://ollama:11434"
