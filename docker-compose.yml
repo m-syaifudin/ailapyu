@@ -1,57 +1,57 @@
-name: ailapyu
-
 services:
   ollama:
     image: ollama/ollama:latest
     container_name: ailapyu-ollama
     restart: unless-stopped
+
     volumes:
       - ollama_data:/root/.ollama
-    ports:
-      - "${OLLAMA_PORT:-11434}:11434"
-    environment:
-      OLLAMA_HOST: "0.0.0.0"
-      OLLAMA_KEEP_ALIVE: "${OLLAMA_KEEP_ALIVE:-5m}"
-    deploy:
-      resources:
-        limits:
-          memory: "${OLLAMA_MEMORY_LIMIT:-3g}"
+      - ./ollama/init.sh:/init.sh:ro
+
+    command: >
+      sh -c "
+      ollama serve &
+      OLLAMA_PID=$!;
+
+      echo 'Waiting for Ollama...';
+
+      until curl -sf http://127.0.0.1:11434/api/tags > /dev/null; do
+        sleep 2;
+      done;
+
+      echo 'Pulling model if missing...';
+
+      ollama list | grep '${OLLAMA_MODEL}' ||
+      ollama pull ${OLLAMA_MODEL};
+
+      wait $OLLAMA_PID
+      "
+
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
 
   api:
     build:
-      context: ./api
+      context: .
       dockerfile: Dockerfile
-    image: ailapyu-api:latest
+
     container_name: ailapyu-api
+
     restart: unless-stopped
-    ports:
-      - "${API_PORT:-8000}:8000"
+
     env_file:
       - .env
+
+    ports:
+      - "${API_PORT}:8000"
+
     depends_on:
       ollama:
         condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          memory: "512m"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
 
 volumes:
   ollama_data:
-    name: ailapyu_ollama_data
-
-networks:
-  default:
-    name: ailapyu_net
