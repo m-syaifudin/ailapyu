@@ -3,7 +3,6 @@
 
 services:
 
-  # ── 1. Ollama model runtime ─────────────────────────────────────────────────
   ollama:
     image: ollama/ollama:latest
     container_name: ailapyu_ollama
@@ -13,10 +12,10 @@ services:
       OLLAMA_HOST: "${OLLAMA_HOST:-0.0.0.0}"
 
     ports:
-      - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"   # bind to localhost only
+      - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
 
     volumes:
-      - ${OLLAMA_VOLUME:-ollama_data}:/root/.ollama  # persist downloaded models
+      - ${OLLAMA_VOLUME:-ollama_data}:/root/.ollama
 
     deploy:
       resources:
@@ -24,30 +23,24 @@ services:
           memory: "${OLLAMA_MEMORY_LIMIT:-3g}"
           cpus:   "${OLLAMA_CPU_LIMIT:-1.8}"
 
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:11434/api/tags"]
-      interval: 15s
-      timeout:  5s
-      retries:  6
-      start_period: 20s
-
     networks:
       - ailapyu_net
 
-  # ── 2. Model initialiser (runs once, then exits) ────────────────────────────
   init-model:
     image: curlimages/curl:latest
     container_name: ailapyu_init
     restart: "no"
     depends_on:
-      ollama:
-        condition: service_healthy
+      - ollama
 
-    # Pull the default model via Ollama's REST API.
-    # The pull is idempotent – already-downloaded layers are skipped.
+    # Wait for Ollama to be ready, then pull the model.
     entrypoint: >
       sh -c "
-        echo '>>> Pulling model: ${DEFAULT_MODEL:-qwen2.5:1.5b} …' &&
+        echo '>>> Waiting for Ollama…' &&
+        until curl -sf http://ollama:11434/api/tags > /dev/null 2>&1; do
+          sleep 2;
+        done &&
+        echo '>>> Pulling model: ${DEFAULT_MODEL:-qwen2.5:1.5b}…' &&
         curl -sf --max-time 600 \
           -X POST http://ollama:11434/api/pull \
           -H 'Content-Type: application/json' \
@@ -58,7 +51,6 @@ services:
     networks:
       - ailapyu_net
 
-# ─────────────────────────────────────────────────────────────────────────────
 volumes:
   ollama_data:
     name: "${OLLAMA_VOLUME:-ollama_data}"
