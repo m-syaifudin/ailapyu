@@ -2,12 +2,19 @@
 bin/
 obj/
 
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
 # User-specific files
 .vs/
 .vscode/
 .idea/
 
 # Logs
+logs/
 *.log
 
 # Environment variables
