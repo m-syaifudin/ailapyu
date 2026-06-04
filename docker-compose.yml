@@ -2,27 +2,31 @@
 # OpenAI-compatible API via Ollama
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: ailapyu_db
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - ailapyu_net
 
   ollama:
     image: ollama/ollama:latest
     container_name: ailapyu_ollama
     restart: unless-stopped
-
     environment:
       OLLAMA_HOST: "${OLLAMA_HOST:-0.0.0.0}"
-
     ports:
       - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
-
     volumes:
       - ${OLLAMA_VOLUME:-ollama_data}:/root/.ollama
-
     deploy:
       resources:
         limits:
           memory: "${OLLAMA_MEMORY_LIMIT:-3g}"
           cpus:   "${OLLAMA_CPU_LIMIT:-1.8}"
-
     networks:
       - ailapyu_net
 
@@ -32,19 +36,16 @@ services:
     restart: "no"
     depends_on:
       - ollama
-
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
         echo '>>> Waiting for Ollama...'
         until ollama list > /dev/null 2>&1; do sleep 2; done
-        echo '>>> Pulling model: ${DEFAULT_MODEL:-qwen2.5:1.5b}...'
-        ollama pull ${DEFAULT_MODEL:-qwen2.5:1.5b}
+        echo '>>> Pulling model: ${DEFAULT_MODEL:-llama3.1:8b}...'
+        ollama pull ${DEFAULT_MODEL:-llama3.1:8b}
         echo '>>> Model ready.'
-
     environment:
       OLLAMA_HOST: "http://ollama:11434"
-
     networks:
       - ailapyu_net
 
@@ -52,21 +53,20 @@ services:
     build:
       context: ./api
     container_name: ailapyu_api
+    env_file: .env
     ports:
       - "${API_PORT:-8000}:8000"
     restart: unless-stopped
-    environment:
-      OLLAMA_HOST: "http://ollama:11434"
-      OLLAMA_MODEL: "${DEFAULT_MODEL:-qwen2.5:1.5b}"
-      LOG_LEVEL: "${LOG_LEVEL:-info}"
     depends_on:
-      - ollama
+      db:
+        condition: service_started
+      ollama:
+        condition: service_started
     networks:
       - ailapyu_net
 
-
-
 volumes:
+  pg_data:
   ollama_data:
     name: "${OLLAMA_VOLUME:-ollama_data}"
 

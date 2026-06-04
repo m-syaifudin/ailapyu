@@ -12,7 +12,7 @@ if [ -f .env ]; then
 fi
 
 PORT="${OLLAMA_PORT:-11434}"
-MODEL="${DEFAULT_MODEL:-qwen2.5:1.5b}"
+MODEL="${DEFAULT_MODEL:-llama3.1:8b}"
 BASE="http://localhost:${PORT}"
 
 pass() { printf "\033[32m✔\033[0m  %s\n" "$1"; }

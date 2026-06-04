@@ -1,40 +1,18 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from openai import AsyncOpenAI
-import os
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
 
-app = FastAPI(title="ailapyu API")
-
-client = AsyncOpenAI(
-    base_url=os.getenv("OLLAMA_BASE_URL", "http://ollama:11434/v1"),
-    api_key="ollama",  # required by openai client, not used by Ollama
-)
-
-MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:1.5b")
+from app.database import create_pool, init_db
+from app.routers.chat import router
 
 
-class ChatRequest(BaseModel):
-    message: str
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    pool = await create_pool()
+    await init_db(pool)
+    app.state.pool = pool
+    yield
+    await pool.close()
 
 
-class ChatResponse(BaseModel):
-    reply: str
-
-
-@app.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest):
-    if not req.message.strip():
-        raise HTTPException(status_code=400, detail="message must not be empty")
-
-    response = await client.chat.completions.create(
-        model=MODEL,
-        messages=[{"role": "user", "content": req.message}],
-    )
-
-    reply = response.choices[0].message.content
-    return ChatResponse(reply=reply)
-
-
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
+app = FastAPI(title="ailapyu", lifespan=lifespan)
+app.include_router(router)
