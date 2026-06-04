@@ -27,26 +27,23 @@ services:
       - ailapyu_net
 
   init-model:
-    image: curlimages/curl:latest
+    image: ollama/ollama:latest
     container_name: ailapyu_init
     restart: "no"
     depends_on:
       - ollama
 
-    # Wait for Ollama to be ready, then pull the model.
-    entrypoint: >
-      sh -c "
-        echo '>>> Waiting for Ollama…' &&
-        until curl -sf http://ollama:11434/api/tags > /dev/null 2>&1; do
-          sleep 2;
-        done &&
-        echo '>>> Pulling model: ${DEFAULT_MODEL:-qwen2.5:1.5b}…' &&
-        curl -sf --max-time 600 \
-          -X POST http://ollama:11434/api/pull \
-          -H 'Content-Type: application/json' \
-          -d '{\"name\": \"${DEFAULT_MODEL:-qwen2.5:1.5b}\", \"stream\": false}' &&
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo '>>> Waiting for Ollama...'
+        until ollama list > /dev/null 2>&1; do sleep 2; done
+        echo '>>> Pulling model: ${DEFAULT_MODEL:-qwen2.5:1.5b}...'
+        ollama pull ${DEFAULT_MODEL:-qwen2.5:1.5b}
         echo '>>> Model ready.'
-      "
+
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
 
     networks:
       - ailapyu_net
