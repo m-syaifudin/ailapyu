@@ -53,7 +53,7 @@ services:
       context: ./api
     container_name: ailapyu_api
     ports:
-      - "${API_PORT:-8000}:8000}"
+      - "${API_PORT:-8000}:8000"
     restart: unless-stopped
     environment:
       OLLAMA_HOST: "http://ollama:11434"
@@ -63,7 +63,7 @@ services:
       - ollama
     networks:
       - ailapyu_net
-      
+
 
 
 volumes:
