@@ -1,9 +1,5 @@
-version: "3.9"
-
-# ─────────────────────────────────────────────────────────────────────────────
 # ailapyu – lightweight local AI service
 # OpenAI-compatible API via Ollama
-# ─────────────────────────────────────────────────────────────────────────────
 
 services:
 
@@ -69,5 +65,4 @@ volumes:
 
 networks:
   ailapyu_net:
-    name: ailapyu_net
     driver: bridge
