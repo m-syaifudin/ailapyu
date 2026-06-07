@@ -1,5 +1,7 @@
 {$DOMAIN_NAME} {
     handle /api/* {
+        # Strip '/api' from the request path before forwarding to the backend
+        uri strip_prefix /api
         reverse_proxy api:8000
     }
 
