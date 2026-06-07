@@ -68,6 +68,22 @@ services:
     networks:
       - ailapyu_net
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+      - WEB_API_URL=${WEB_API_URL}
+    container_name: ailapyu_frontend
+    ports:
+      - "${WEB_PORT:-8080}:80"    
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - ailapyu_net
+
 volumes:
   pg_data:
   ollama_data:
