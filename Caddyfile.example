@@ -1,0 +1,11 @@
+yourdomain.com {
+    # Route all API traffic directly to your backend container
+    handle /api/* {
+        reverse_proxy api:8000
+    }
+
+    # Route all other web traffic to your Flutter frontend container
+    handle {
+        reverse_proxy frontend:80
+    }
+}
