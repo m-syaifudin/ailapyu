@@ -6,3 +6,7 @@ The project pairs a Flutter Web frontend with a FastAPI backend, powered by a lo
 ## Architecture Overview
 
 User Browser ➡️ Flutter Web (8080) ➡️ FastAPI Backend (8000) ➡️ Ollama LLM / PostgreSQL DB
+
+## Demo app
+
+https://syaifudinprojects.my.id/
