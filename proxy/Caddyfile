@@ -1,0 +1,9 @@
+{env.DOMAIN_NAME} {
+    handle /api/* {
+        reverse_proxy api:8000
+    }
+
+    handle {
+        reverse_proxy frontend:80
+    }
+}
