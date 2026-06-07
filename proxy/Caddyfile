@@ -1,15 +1,13 @@
 {$DOMAIN_NAME} {
-    # 1. Route API requests
-    handle /api/* {
-        # Strip '/api' from the request path before forwarding to the backend
+    # 1. Route ONLY specific API requests to the backend
+    # Example: syaifudinprojects.my.id/api/chat -> api:8000/chat
+    handle /api/* {        
         uri strip_prefix /api
         reverse_proxy api:8000
     }
 
-    # 2. Simple fix for your chat route
-    rewrite /chat /index.html
-
-    # 3. Send everything else to the frontend normally
+    # 2. Send EVERYTHING ELSE to the Flutter frontend
+    # Example: syaifudinprojects.my.id/ or /chat -> frontend:80
     handle {
         reverse_proxy frontend:80
     }
