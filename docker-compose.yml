@@ -83,6 +83,7 @@ services:
       - ailapyu_net
 
   reverse-proxy:
+    build: ./proxy
     image: caddy:alpine
     container_name: ailapyu_proxy
     restart: unless-stopped
@@ -94,8 +95,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      # This pulls DOMAIN_NAME from your host's .env file and passes it to Caddy
+      DOMAIN_NAME: "${DOMAIN_NAME}"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
     
