@@ -75,8 +75,6 @@ services:
       args:
       - WEB_API_URL=${WEB_API_URL}
     container_name: ailapyu_frontend
-    ports:
-      - "${WEB_PORT:-8080}:80"    
     restart: unless-stopped
     depends_on:
       api:
@@ -84,10 +82,30 @@ services:
     networks:
       - ailapyu_net
 
+  reverse-proxy:
+    image: caddy:alpine
+    container_name: ailapyu_proxy
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_started
+    networks:
+      - ailapyu_net
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    
+
 volumes:
   pg_data:
   ollama_data:
     name: "${OLLAMA_VOLUME:-ollama_data}"
+  caddy_data:
+  caddy_config:
 
 networks:
   ailapyu_net:
