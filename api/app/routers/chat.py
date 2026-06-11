@@ -10,28 +10,31 @@ from app.ollama import chat_completion
 
 router = APIRouter()
 
-
 class ChatRequest(BaseModel):
+    userId: str
     message: str
 
-
 class ChatResponse(BaseModel):
+    userId: str
     reply: str
-
 
 @router.get("/health")
 async def health():
     return {"status": "ok"}
 
 
-@router.post("/chat") #("/chat") response_model=ChatResponse)
+@router.post("/chat")
 async def chat(req: ChatRequest, request: Request):
+    userId = request.userId
+    if userId not in sessions:
+        sessions[userId] = []
+    sessions[userId].append({"role": "user", "content": user_message})
 
     pool: asyncpg.Pool = request.app.state.pool
 
-    await save_message(pool, "user", req.message)
+    await save_message(pool, "user", req.message, userId)
 
-    history = await fetch_history(pool)
+    history = await fetch_history(pool, userId)
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history 
 

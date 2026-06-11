@@ -15,7 +15,6 @@ async def lifespan(app: FastAPI):
     yield
     await pool.close()
 
-
 app = FastAPI(title="ailapyu", lifespan=lifespan)
 
 app.add_middleware(

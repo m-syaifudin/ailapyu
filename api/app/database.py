@@ -13,18 +13,20 @@ async def init_db(pool: asyncpg.Pool) -> None:
                 id         BIGSERIAL PRIMARY KEY,
                 role       TEXT        NOT NULL,
                 content    TEXT        NOT NULL,
+                user_id    TEXT        NOT NULL,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT now()
             )
         """)
 
 
-async def fetch_history(pool: asyncpg.Pool) -> list[dict]:
+async def fetch_history(pool: asyncpg.Pool, userId: str) -> list[dict]:
     async with pool.acquire() as conn:
         rows = await conn.fetch("""
             SELECT role, content
             FROM (
-                SELECT role, content, created_at
+                SELECT role, content, user_id, created_at
                 FROM messages
+                WHERE user_id = $1
                 ORDER BY created_at DESC
                 LIMIT $1
             ) sub
@@ -33,9 +35,9 @@ async def fetch_history(pool: asyncpg.Pool) -> list[dict]:
     return [{"role": r["role"], "content": r["content"]} for r in rows]
 
 
-async def save_message(pool: asyncpg.Pool, role: str, content: str) -> None:
+async def save_message(pool: asyncpg.Pool, role: str, content: str, userId: str) -> None:
     async with pool.acquire() as conn:
         await conn.execute(
-            "INSERT INTO messages (role, content) VALUES ($1, $2)",
+            "INSERT INTO messages (role, content, user_id) VALUES ($1, $2, $3)",
             role, content,
         )
