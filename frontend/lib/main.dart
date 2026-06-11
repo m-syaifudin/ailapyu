@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frontend/services/api_config.dart';
 import 'package:frontend/widgets/thinking_indicator.dart';
 import 'package:http/http.dart' as http;
@@ -192,16 +193,42 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Ask me anything...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
+                  child: Focus(
+                    onKeyEvent: (FocusNode node, KeyEvent event) {
+                      //(KeyDownEvent)
+                      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+                        
+                        // 1. (Shift + Enter)
+                        if (HardwareKeyboard.instance.isShiftPressed) {
+                          // newline
+                          return KeyEventResult.ignored; 
+                        }
+                        
+                        // 2. Enter
+                        if (_messageController.text.trim().isNotEmpty) {
+                          askQuestion();
+                        }                       
+                        
+                        return KeyEventResult.handled; 
+                      }
+                      
+                      return KeyEventResult.ignored;
+                    },
+                    child: TextField(
+                      controller: _messageController,
+                      //textInputAction: TextInputAction.send, //make android keyboard into send
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      minLines: 1,
+                      decoration: InputDecoration(
+                        hintText: 'Ask me anything...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[100],                      
                       ),
-                      filled: true,
-                      fillColor: Colors.grey[100],
                     ),
                   ),
                 ),
