@@ -27,6 +27,9 @@ async def health():
 async def chat(req: ChatRequest, request: Request):
     userId = req.userId
 
+    print("1 " + userId)
+    print("2 " + req.userId)
+
     pool: asyncpg.Pool = request.app.state.pool
 
     await save_message(pool, "user", req.message, req.userId)
