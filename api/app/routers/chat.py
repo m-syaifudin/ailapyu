@@ -25,10 +25,7 @@ async def health():
 
 @router.post("/chat")
 async def chat(req: ChatRequest, request: Request):
-    userId = req.userId
-
-    print("1 " + userId)
-    print("2 " + req.userId)
+    #print("2 " + req.userId)
 
     pool: asyncpg.Pool = request.app.state.pool
 

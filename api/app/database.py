@@ -39,5 +39,5 @@ async def save_message(pool: asyncpg.Pool, role: str, content: str, userId: str)
     async with pool.acquire() as conn:
         await conn.execute(
             "INSERT INTO messages (role, content, user_id) VALUES ($1, $2, $3)",
-            role, content,
+            role, content, userId
         )
