@@ -45,48 +45,114 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
   List<Map<String, String>> _messages = [];
 
   // Function to send message to FastAPI
-  Future<void> _sendMessage() async {
-    final userText = _messageController.text.trim();
-    if (userText.isEmpty) return;
+  
+  // Future<void> _sendMessage() async {
+  //   final userText = _messageController.text.trim();
+  //   if (userText.isEmpty) return;
 
-    // 1. Clear input and immediately show user message in the UI
-    _messageController.clear();
-    setState(() {
-      _messages.add({'sender': 'user', 'text': userText});
-      _isLoading = true;
+  //   // 1. Clear input and immediately show user message in the UI
+  //   _messageController.clear();
+  //   setState(() {
+  //     _messages.add({'sender': 'user', 'text': userText});
+  //     _isLoading = true;
+  //   });
+
+  //   try {
+  //     // 2. Hit your FastAPI endpoint (Replace with your actual IP/URL)
+  //     // Note: Use '10.0.2.2' if testing on an Android Emulator pointing to local host
+  //     final url = Uri.parse(ApiConfig.baseUrl); 
+      
+  //     final response = await http.post(
+  //       url,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode({'message': userText}),
+  //     );
+
+  //     print('Response status: ${response.statusCode}');
+
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+        
+  //       // 3. Update UI with AI response
+  //       setState(() {
+  //         _messages.add({'sender': 'ai', 'text': data['reply']});
+  //       });
+  //     } else {
+  //       _showError('Failed to connect to AI server.');
+  //     }
+  //   } catch (e) {
+  //     _showError('Error: Could not reach backend.');
+  //   } finally {
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+  //   }
+  // }
+
+  Future<void> _sendMessage() async {
+  final userText = _messageController.text.trim();
+  if (userText.isEmpty) return;
+
+  _messageController.clear();
+
+  setState(() {
+    _messages.add({'sender': 'user', 'text': userText});
+
+    // placeholder AI message
+    _messages.add({'sender': 'ai', 'text': ''});
+
+    _isLoading = true;
+  });
+
+  try {
+    final request = http.Request(
+      'POST',
+      Uri.parse(ApiConfig.baseUrl),
+    );
+
+    request.headers['Content-Type'] = 'application/json';
+
+    request.body = jsonEncode({
+      'message': userText,
     });
 
-    try {
-      // 2. Hit your FastAPI endpoint (Replace with your actual IP/URL)
-      // Note: Use '10.0.2.2' if testing on an Android Emulator pointing to local host
-      final url = Uri.parse(ApiConfig.baseUrl); 
-      
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'message': userText}),
+    final streamedResponse = await request.send();
+
+    if (streamedResponse.statusCode == 200) {
+      streamedResponse.stream
+          .transform(utf8.decoder)
+          .listen(
+        (chunk) {
+          setState(() {
+            _messages.last['text'] =
+                (_messages.last['text'] ?? '') + chunk;
+          });
+        },
+        onDone: () {
+          setState(() {
+            _isLoading = false;
+          });
+        },
+        onError: (e) {
+          _showError('Stream error');
+          setState(() {
+            _isLoading = false;
+          });
+        },
       );
-
-      print('Response status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        
-        // 3. Update UI with AI response
-        setState(() {
-          _messages.add({'sender': 'ai', 'text': data['reply']});
-        });
-      } else {
-        _showError('Failed to connect to AI server.');
-      }
-    } catch (e) {
-      _showError('Error: Could not reach backend.');
-    } finally {
+    } else {
+      _showError('Failed to connect to AI server.');
       setState(() {
         _isLoading = false;
       });
     }
+  } catch (e) {
+    _showError('Error: Could not reach backend.');
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
 
   void _showError(String message) {
     setState(() {

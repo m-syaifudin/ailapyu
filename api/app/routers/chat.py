@@ -23,8 +23,9 @@ async def health():
     return {"status": "ok"}
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat") #("/chat") response_model=ChatResponse)
 async def chat(req: ChatRequest, request: Request):
+
     pool: asyncpg.Pool = request.app.state.pool
 
     await save_message(pool, "user", req.message)
@@ -33,8 +34,20 @@ async def chat(req: ChatRequest, request: Request):
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history 
 
-    reply = await chat_completion(messages)
+    # reply = await chat_completion(messages)
+
+    async def generate():
+        full_reply = ""
+
+        async for chunk in chat_completion(messages):
+            full_reply += chunk
+            yield chink          
 
     await save_message(pool, "assistant", reply)
 
-    return ChatResponse(reply=reply)
+    # return ChatResponse(reply=reply)
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/plain"
+    )
