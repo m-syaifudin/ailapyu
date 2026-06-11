@@ -119,7 +119,7 @@ class _ChatPageState extends State<ChatPage> {
       _isLoading = false;
       // Optional: Add a visual indicator that it was cut off
       final currentText = aiMessage['text'] ?? '';
-      aiMessage['text'] = '$currentText 🛑 (Interrupted)';
+      aiMessage['text'] = '$currentText (Interrupted)';
     });
     _cleanup();
   }
@@ -249,11 +249,11 @@ class _ChatPageState extends State<ChatPage> {
                 FloatingActionButton(
                   onPressed: () {
                     // Logic to send message and get AI response.
-                    askQuestion(); 
+                    _isLoading ? stopGeneration() : askQuestion(); 
                   },
                   backgroundColor: primaryTeal,
                   mini: true,
-                  child: const Icon(Icons.send, size: 18),
+                  child: _isLoading ? const Icon(Icons.stop_circle, size: 18) : const Icon(Icons.send, size: 18),
                 ),
               ],
             ),
