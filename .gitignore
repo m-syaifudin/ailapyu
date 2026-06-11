@@ -19,7 +19,7 @@ logs/
 
 # Environment variables
 .env
-proxy/Caddyfile
+/proxy/Caddyfile
 
 # OS files
 .DS_Store
