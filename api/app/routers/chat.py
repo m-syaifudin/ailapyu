@@ -31,7 +31,7 @@ async def chat(req: ChatRequest, request: Request):
 
     await save_message(pool, "user", req.message, req.userId)
 
-    history = await fetch_history(pool, userId)
+    history = await fetch_history(pool, req.userId)
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history 
 
