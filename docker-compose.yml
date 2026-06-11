@@ -19,7 +19,7 @@ services:
     environment:
       OLLAMA_HOST: "${OLLAMA_HOST:-0.0.0.0}"
       OLLAMA_NUM_PARALLEL: "${OLLAMA_NUM_PARALLEL:-1000}"
-      OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS:-1"
+      OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS:-1}"
     volumes:
       - ${OLLAMA_VOLUME:-ollama_data}:/root/.ollama
     deploy:
