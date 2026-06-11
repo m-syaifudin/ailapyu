@@ -38,6 +38,7 @@ class ChatHomeScreen extends StatefulWidget {
 class _ChatHomeScreenState extends State<ChatHomeScreen> {
   // Controller to read and clear the text field
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   
   List<Map<String, String>> _messages = [];
 
@@ -45,47 +46,92 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
   bool _isLoading = false;
 
 
-Future<void> askQuestion() async {
-  final userText = _messageController.text.trim();
-  if (userText.isEmpty) return;
+  Future<void> askQuestion() async {
+    final userText = _messageController.text.trim();
+    final client = http.Client();
 
-  _messageController.clear();
+    if (userText.isEmpty) return;
 
-  final aiIndex = _messages.length - 1;
+    _messageController.clear();
+    
+    final Map<String, String> aiMessage = {'sender': 'ai', 'text': ''};
 
- setState(() {
-    _isLoading = true;
-    _messages.add({'sender': 'user', 'text': userText});
-    _messages.add({'sender': 'ai', 'text': ''});  // ✅ new map every time
-  });
+    setState(() {
+      _isLoading = true;
+      _messages.add({'sender': 'user', 'text': userText});
+      _messages.add(aiMessage); 
+    });
 
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
-  final client = http.Client();
-  final request = http.Request('POST', Uri.parse(ApiConfig.baseUrl));
+    
+    try {
+      final request = http.Request('POST', Uri.parse(ApiConfig.baseUrl));
+      request.headers['Content-Type'] = 'application/json';
+      request.body = jsonEncode({'message': userText});
 
-  request.headers['Content-Type'] = 'application/json';
-  request.body = jsonEncode({'message': userText});
-
-  final response = await client.send(request); // ← returns a Stream
-
-  response.stream
-    .transform(utf8.decoder)    // bytes → String
-    .transform(const LineSplitter()) 
-    .where((line) => line.isNotEmpty) 
-    .listen(
-      (line) {
+      final response = await client.send(request);
+      
+      if (response.statusCode != 200) {
         setState(() {
-          _messages[aiIndex]['text'] = (_messages[aiIndex]['text'] ?? '') + line;
+          aiMessage['text'] = 'Server Error (${response.statusCode}). Failed to connect.';
+          _isLoading = false;
         });
-      },
-      onDone: () {
-        setState(() => _isLoading = false);
         client.close();
-      },
-    );
-}
-  
-  
+        return;
+      }
+
+      response.stream
+        .transform(utf8.decoder)   
+        .transform(const LineSplitter()) 
+        .listen(
+          (line) {            
+            if (line.isNotEmpty) {
+              setState(() {
+                final currentText = aiMessage['text'] ?? '';
+                aiMessage['text'] = currentText + line;
+              });
+              WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+            }
+          },
+          onDone: () {
+            setState(() => _isLoading = false);
+            client.close();
+            WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+          },
+          onError: (error) {
+            setState(() {
+              aiMessage['text'] = 'Stream Error: $error';
+              _isLoading = false;
+            });
+            client.close();
+          }
+        );
+    } catch (e) {
+      setState(() {
+        aiMessage['text'] = 'Connection Failed: $e';
+        _isLoading = false;
+      });
+      client.close();
+    }
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+    
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
 
 
   @override
@@ -108,6 +154,7 @@ Future<void> askQuestion() async {
           // 1. CHAT MESSAGE AREA
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final ChatMessage message = ChatMessage(
