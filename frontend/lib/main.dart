@@ -103,7 +103,7 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
           },
           onError: (error) {
             setState(() {
-              aiMessage['text'] = 'Stream Error: $error';
+              aiMessage['text'] = 'Stream Error: network error';
               _isLoading = false;
             });
             client.close();
