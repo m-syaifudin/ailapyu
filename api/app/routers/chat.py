@@ -25,11 +25,8 @@ async def health():
 
 @router.post("/chat")
 async def chat(req: ChatRequest, request: Request):
-    userId = request.userId
-    if userId not in sessions:
-        sessions[userId] = []
-    sessions[userId].append({"role": "user", "content": user_message})
-
+    userId = req.userId
+    
     pool: asyncpg.Pool = request.app.state.pool
 
     await save_message(pool, "user", req.message, userId)
