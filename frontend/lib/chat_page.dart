@@ -210,6 +210,7 @@ class _ChatPageState extends State<ChatPage> {
                       //textInputAction: TextInputAction.send, //make android keyboard into send
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
                       minLines: 1,
                       decoration: InputDecoration(
                         hintText: 'Ask me anything...',
