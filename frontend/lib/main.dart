@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/api_config.dart';
+import 'package:frontend/widgets/thinking_indicator.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/models/chat_message_model.dart';
 import 'package:frontend/widgets/chat_bubble_widget.dart';
@@ -157,14 +158,29 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
               controller: _scrollController,
               itemCount: _messages.length,
               itemBuilder: (context, index) {
+
+                final isAi = _messages[index]['sender'] == 'ai';
+                final text = _messages[index]['text'] ?? '';
+
                 final ChatMessage message = ChatMessage(
                   text: _messages[index]['text']!,
                   isUser: _messages[index]['sender'] == 'user',
                 );
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   // ChatBubble is a custom widget defined below
-                  child: ChatBubble(message: message),
+                  child: 
+                    isAi && text.isEmpty ?
+                    const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("Thinking ", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+                        SizedBox(width: 4),
+                        ThinkingIndicator(), // blinking animation
+                      ],
+                    )
+                    : ChatBubble(message: message),
                 );
               },
             ),
