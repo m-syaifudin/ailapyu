@@ -1,6 +1,7 @@
 import json
 import asyncpg
 from fastapi import APIRouter, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from app.config import SYSTEM_PROMPT
@@ -41,11 +42,11 @@ async def chat(req: ChatRequest, request: Request):
 
         async for chunk in chat_completion(messages):
             full_reply += chunk
-            yield chink          
+            yield chunk          
 
-    await save_message(pool, "assistant", reply)
+        await save_message(pool, "assistant", full_reply)
 
-    # return ChatResponse(reply=reply)
+        # return ChatResponse(reply=reply)
 
     return StreamingResponse(
         generate(),

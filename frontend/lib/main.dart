@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/api_config.dart';
+import 'package:frontend/services/api_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/models/chat_message_model.dart';
 import 'package:frontend/widgets/chat_bubble_widget.dart';
@@ -38,127 +38,51 @@ class ChatHomeScreen extends StatefulWidget {
 class _ChatHomeScreenState extends State<ChatHomeScreen> {
   // Controller to read and clear the text field
   final TextEditingController _messageController = TextEditingController();
-
-  bool _isLoading = false; // To show a loading indicator when waiting for AI response
-
-  // A hypothetical list of messages.
+  
   List<Map<String, String>> _messages = [];
 
-  // Function to send message to FastAPI
-  
-  // Future<void> _sendMessage() async {
-  //   final userText = _messageController.text.trim();
-  //   if (userText.isEmpty) return;
+ 
+  bool _isLoading = false;
 
-  //   // 1. Clear input and immediately show user message in the UI
-  //   _messageController.clear();
-  //   setState(() {
-  //     _messages.add({'sender': 'user', 'text': userText});
-  //     _isLoading = true;
-  //   });
 
-  //   try {
-  //     // 2. Hit your FastAPI endpoint (Replace with your actual IP/URL)
-  //     // Note: Use '10.0.2.2' if testing on an Android Emulator pointing to local host
-  //     final url = Uri.parse(ApiConfig.baseUrl); 
-      
-  //     final response = await http.post(
-  //       url,
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode({'message': userText}),
-  //     );
-
-  //     print('Response status: ${response.statusCode}');
-
-  //     if (response.statusCode == 200) {
-  //       final data = jsonDecode(response.body);
-        
-  //       // 3. Update UI with AI response
-  //       setState(() {
-  //         _messages.add({'sender': 'ai', 'text': data['reply']});
-  //       });
-  //     } else {
-  //       _showError('Failed to connect to AI server.');
-  //     }
-  //   } catch (e) {
-  //     _showError('Error: Could not reach backend.');
-  //   } finally {
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //   }
-  // }
-
-  Future<void> _sendMessage() async {
+Future<void> askQuestion() async {
   final userText = _messageController.text.trim();
   if (userText.isEmpty) return;
 
   _messageController.clear();
 
-  setState(() {
-    _messages.add({'sender': 'user', 'text': userText});
+  final aiIndex = _messages.length - 1;
 
-    // placeholder AI message
-    _messages.add({'sender': 'ai', 'text': ''});
-
+ setState(() {
     _isLoading = true;
+    _messages.add({'sender': 'user', 'text': userText});
+    _messages.add({'sender': 'ai', 'text': ''});  // ✅ new map every time
   });
 
-  try {
-    final request = http.Request(
-      'POST',
-      Uri.parse(ApiConfig.baseUrl),
+
+  final client = http.Client();
+  final request = http.Request('POST', Uri.parse(ApiConfig.baseUrl));
+
+  request.headers['Content-Type'] = 'application/json';
+  request.body = jsonEncode({'message': userText});
+
+  final response = await client.send(request); // ← returns a Stream
+
+  response.stream
+    .transform(utf8.decoder)    // bytes → String
+    .listen(
+      (chunk) {
+        setState(() => _messages[aiIndex]['text'] = (_messages[aiIndex]['text'] ?? '') + chunk); // append each chunk to UI
+      },
+      onDone: () {
+        setState(() => _isLoading = false);
+        client.close();
+      },
     );
-
-    request.headers['Content-Type'] = 'application/json';
-
-    request.body = jsonEncode({
-      'message': userText,
-    });
-
-    final streamedResponse = await request.send();
-
-    if (streamedResponse.statusCode == 200) {
-      streamedResponse.stream
-          .transform(utf8.decoder)
-          .listen(
-        (chunk) {
-          setState(() {
-            _messages.last['text'] =
-                (_messages.last['text'] ?? '') + chunk;
-          });
-        },
-        onDone: () {
-          setState(() {
-            _isLoading = false;
-          });
-        },
-        onError: (e) {
-          _showError('Stream error');
-          setState(() {
-            _isLoading = false;
-          });
-        },
-      );
-    } else {
-      _showError('Failed to connect to AI server.');
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  } catch (e) {
-    _showError('Error: Could not reach backend.');
-    setState(() {
-      _isLoading = false;
-    });
-  }
 }
+  
+  
 
-  void _showError(String message) {
-    setState(() {
-      _messages.add({'sender': 'ai', 'text': message});
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +142,7 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
                 FloatingActionButton(
                   onPressed: () {
                     // Logic to send message and get AI response.
-                    _sendMessage(); 
+                    askQuestion(); 
                   },
                   backgroundColor: primaryTeal,
                   mini: true,

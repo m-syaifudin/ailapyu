@@ -1,4 +1,5 @@
 import httpx
+import json
 from fastapi import HTTPException
 from app.config import OLLAMA_HOST, OLLAMA_MODEL
 
@@ -19,6 +20,7 @@ from app.config import OLLAMA_HOST, OLLAMA_MODEL
 
 async def chat_completion(messages):
     url = f"{OLLAMA_HOST}/v1/chat/completions"
+
     async with httpx.AsyncClient(timeout=None) as client:
         async with client.stream(
             "POST",
@@ -31,11 +33,24 @@ async def chat_completion(messages):
         ) as response:
 
             async for line in response.aiter_lines():
+
                 if not line:
                     continue
+                
+                if not line.startswith("data: "):
+                    continue
+
+                if line.startswith("data: "):
+                    line = line.removeprefix("data:").strip()
+
+                if line == "[DONE]":
+                    break
 
                 data = json.loads(line)
 
-                if "message" in data:
-                    content = data["message"]["content"]
-                    yield content
+                delta = data["choices"][0]["delta"]
+
+                content = delta.get("content")
+
+                if content:
+                    yield content + "\n"
