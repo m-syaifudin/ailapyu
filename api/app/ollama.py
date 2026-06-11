@@ -29,6 +29,10 @@ async def chat_completion(messages):
                 "model": OLLAMA_MODEL,
                 "messages": messages,
                 "stream": True
+                "options": {
+                    "num_ctx": 2048,      # ◄ Caps context to prevent CPU segmentation faults
+                    "num_predict": 512,    # ◄ Limits how long a single reply can be
+                }
             }
         ) as response:
 
