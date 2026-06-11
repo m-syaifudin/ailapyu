@@ -118,8 +118,7 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       _isLoading = false;
       // Optional: Add a visual indicator that it was cut off
-      final currentText = aiMessage['text'] ?? '';
-      aiMessage['text'] = '$currentText (Interrupted)';
+      aiMessage['text'] = '(Interrupted)';
     });
     _cleanup();
   }
