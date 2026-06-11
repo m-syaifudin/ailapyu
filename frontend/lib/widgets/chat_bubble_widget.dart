@@ -60,29 +60,32 @@ class ChatBubble extends StatelessWidget {
                           fontSize: 18,
                         ),
                       ),
+
+                      CodeConfig(
+                        style: const TextStyle(
+                          color: Color(0xFFA6E22E), // Bright green text for code strings
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          backgroundColor: Colors.transparent, // Prevents tiny white blocks inside
+                        ),
+                      ),
                       
-                      // code block ``` 
+                      //  Code Block Container
                       PreConfig(
                         padding: const EdgeInsets.all(14),
                         margin: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: Colors.grey[900], // Kotak hitam untuk kodingan
+                          color: Colors.grey[900], // Dark background for code block
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        textStyle: const TextStyle(
-                          color: Color(0xFFA6E22E), // Warna teks kodingan hijau terang
-                          fontFamily: 'monospace',
-                          fontSize: 13,
-                        ),
-                        // Menggunakan properti 'wrapper' yang valid untuk membuat scroll horizontal
+                        // textStyle here only affects fallback layout, CodeConfig handles the letters
                         wrapper: (child, code, language) {
                           return SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: child,
                           );
                         },
-                      ),                    
-
+                      ),                 
                     ],
                   ),
                 )
