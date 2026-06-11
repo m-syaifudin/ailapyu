@@ -119,7 +119,9 @@ class _ChatPageState extends State<ChatPage> {
   if (_isLoading) {
     setState(() {
       _isLoading = false;
-      // Optional: Add a visual indicator that it was cut off      
+      // Optional: Add a visual indicator that it was cut off     
+      final Map<String, String> stopMessage = {'sender': 'ai', 'text': 'Generation stopped before response.'};
+      _messages.add(stopMessage);
     });
     _cleanup();
   }
@@ -179,8 +181,8 @@ class _ChatPageState extends State<ChatPage> {
                   // ChatBubble is a custom widget defined below
                   child: 
                     !message.isUser && text.isEmpty ?
-                    (_isLoading 
-                      ? const Row(
+                    
+                       const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text("Thinking ", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
@@ -188,11 +190,8 @@ class _ChatPageState extends State<ChatPage> {
                             ThinkingIndicator(), 
                           ],
                         )
-                      : const Text(
-                          "Generation stopped before response.", 
-                          style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
-                        )
-                    )
+                      
+                    
                     : ChatBubble(message: message),
                 );
               },
