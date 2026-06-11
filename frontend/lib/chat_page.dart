@@ -190,7 +190,7 @@ class _ChatPageState extends State<ChatPage> {
                         }
 
                         // 2. Enter android enter
-                        if (event.deviceType != KeyEventDeviceType.keyboard) {
+                        if (event.deviceType == KeyEventDeviceType.keyboard) {
                           return KeyEventResult.ignored; 
                         }                     
                         
