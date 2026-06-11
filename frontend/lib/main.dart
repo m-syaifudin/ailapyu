@@ -70,9 +70,13 @@ Future<void> askQuestion() async {
 
   response.stream
     .transform(utf8.decoder)    // bytes → String
+    .transform(const LineSplitter()) 
+    .where((line) => line.isNotEmpty) 
     .listen(
-      (chunk) {
-        setState(() => _messages[aiIndex]['text'] = (_messages[aiIndex]['text'] ?? '') + chunk); // append each chunk to UI
+      (line) {
+        setState(() {
+          _messages[aiIndex]['text'] = (_messages[aiIndex]['text'] ?? '') + line;
+        });
       },
       onDone: () {
         setState(() => _isLoading = false);
