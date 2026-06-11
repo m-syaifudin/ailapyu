@@ -171,7 +171,7 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   // ChatBubble is a custom widget defined below
                   child: 
-                    isAi && text.isEmpty ?
+                    !message.isUser && text.isEmpty ?
                     const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
