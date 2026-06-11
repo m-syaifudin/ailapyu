@@ -1,6 +1,7 @@
 // A custom widget for the chat bubble with the image.
 import 'package:frontend/models/chat_message_model.dart';
 import 'package:flutter/material.dart';
+import 'package:markdown_widget/markdown_widget.dart';
 
 // Assume image_0.png is in your assets folder.
 const String aiProfileImage = 'images/ai_character.png'; 
@@ -38,7 +39,41 @@ class ChatBubble extends StatelessWidget {
               bottomRight: message.isUser ? Radius.zero : const Radius.circular(16),
             ),
           ),
-          child: Text(
+          child: !message.isUser ? 
+            MarkdownBlock( // reply from AI
+                  data: message.text,
+                  config: MarkdownConfig(
+                    configs: [
+                      // (Paragraph)
+                      PConfig(
+                        textStyle: const TextStyle(
+                        color: Colors.white, 
+                        fontSize: 15,
+                        ),
+                      ),
+
+                      //Title H3
+                      H3Config(
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      
+                      // code block ``` 
+                      PreConfig(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[900],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        //theme: ordered_by_theme, // Mengikuti tema bawaan highlight kode
+                      ),                    
+
+                    ],
+                  ),
+                )
+            : Text(
             message.text,
             style: TextStyle(
               color: message.isUser ? Colors.black87 : Colors.white,
