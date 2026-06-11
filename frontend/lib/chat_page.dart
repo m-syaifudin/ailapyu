@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -27,21 +28,18 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   
-  List<Map<String, String>> _messages = [];
-
- 
+  List<Map<String, String>> _messages = [];  
+  StreamSubscription<String>? _streamSubscription;
+  http.Client? _currentClient;
   bool _isLoading = false;
-
+  final Map<String, String> aiMessage = {'sender': 'ai', 'text': ''};
 
   Future<void> askQuestion() async {
-    final userText = _messageController.text.trim();
-    final client = http.Client();
-
+    final userText = _messageController.text.trim();  
     if (userText.isEmpty) return;
-
     _messageController.clear();
     
-    final Map<String, String> aiMessage = {'sender': 'ai', 'text': ''};
+    
 
     setState(() {
       _isLoading = true;
@@ -53,18 +51,20 @@ class _ChatPageState extends State<ChatPage> {
 
     
     try {
+      _currentClient = http.Client();
+
       final request = http.Request('POST', Uri.parse(ApiConfig.baseUrl));
       request.headers['Content-Type'] = 'application/json';
       request.body = jsonEncode({'userId': widget.userId,'message': userText});
 
-      final response = await client.send(request);
+      final response = await _currentClient!.send(request);
       
       if (response.statusCode != 200) {
         setState(() {
           aiMessage['text'] = 'Server Error (${response.statusCode}). Failed to connect.';
           _isLoading = false;
         });
-        client.close();
+        _cleanup();
         return;
       }
 
@@ -83,7 +83,7 @@ class _ChatPageState extends State<ChatPage> {
           },
           onDone: () {
             setState(() => _isLoading = false);
-            client.close();
+            _cleanup();
             WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
           },
           onError: (error) {
@@ -91,7 +91,7 @@ class _ChatPageState extends State<ChatPage> {
               aiMessage['text'] = 'Stream Error: network error';
               _isLoading = false;
             });
-            client.close();
+            _cleanup();
           }
         );
     } catch (e) {
@@ -99,7 +99,7 @@ class _ChatPageState extends State<ChatPage> {
         aiMessage['text'] = 'Connection Failed: $e';
         _isLoading = false;
       });
-      client.close();
+      _cleanup();
     }
   }
 
@@ -112,9 +112,30 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
   }
+
+  void stopGeneration() {
+  if (_isLoading) {
+    setState(() {
+      _isLoading = false;
+      // Optional: Add a visual indicator that it was cut off
+      final currentText = aiMessage['text'] ?? '';
+      aiMessage['text'] = '$currentText 🛑 (Interrupted)';
+    });
+    _cleanup();
+  }
+}
+
+  void _cleanup() {
+  _streamSubscription?.cancel();
+  _streamSubscription = null;
+  
+  _currentClient?.close();
+  _currentClient = null;
+}
     
   @override
   void dispose() {
+    _cleanup();
     _scrollController.dispose();
     _messageController.dispose();
     super.dispose();

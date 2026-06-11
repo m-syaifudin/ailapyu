@@ -25,14 +25,11 @@ async def health():
 
 @router.post("/chat")
 async def chat(req: ChatRequest, request: Request):
-    #print("2 " + req.userId)
-
     pool: asyncpg.Pool = request.app.state.pool
 
     await save_message(pool, "user", req.message, req.userId)
 
     history = await fetch_history(pool, req.userId)
-
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history 
 
     # reply = await chat_completion(messages)
@@ -40,13 +37,21 @@ async def chat(req: ChatRequest, request: Request):
     async def generate():
         full_reply = ""
 
-        async for chunk in chat_completion(messages):
-            full_reply += chunk
-            yield chunk          
+        try:
+            async for chunk in chat_completion(messages):
+                if await request.is_disconnected():
+                    raise asyncio.CancelledError()
+                    
+                full_reply += chunk
+                yield chunk          
 
-        await save_message(pool, "assistant", full_reply, req.userId)
+            await save_message(pool, "assistant", full_reply, req.userId)
 
-        # return ChatResponse(reply=reply)
+            # return ChatResponse(reply=reply)
+
+        except asyncio.CancelledError:
+            print(f"Chat interrupted by user {req.userId}. Assistant response discarded.")
+            raise    
 
     return StreamingResponse(
         generate(),
