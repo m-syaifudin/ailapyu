@@ -179,13 +179,19 @@ class _ChatPageState extends State<ChatPage> {
                   // ChatBubble is a custom widget defined below
                   child: 
                     !message.isUser && text.isEmpty ?
-                    const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text("Thinking ", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
-                        SizedBox(width: 4),
-                        ThinkingIndicator(), // blinking animation
-                      ],
+                    (_isLoading 
+                      ? const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text("Thinking ", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+                            SizedBox(width: 4),
+                            ThinkingIndicator(), 
+                          ],
+                        )
+                      : const Text(
+                          "Generation stopped before response.", 
+                          style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                        )
                     )
                     : ChatBubble(message: message),
                 );
