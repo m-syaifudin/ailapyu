@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/services/api_config.dart';
@@ -197,6 +199,10 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
                     onKeyEvent: (FocusNode node, KeyEvent event) {
                       //(KeyDownEvent)
                       if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+
+                        if (event.deviceType == KeyEventDeviceType.keyboard) {
+                          return KeyEventResult.ignored; 
+                        }
                         
                         // 1. (Shift + Enter)
                         if (HardwareKeyboard.instance.isShiftPressed) {
