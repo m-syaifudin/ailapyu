@@ -26,10 +26,10 @@ async def health():
 @router.post("/chat")
 async def chat(req: ChatRequest, request: Request):
     userId = req.userId
-    
+
     pool: asyncpg.Pool = request.app.state.pool
 
-    await save_message(pool, "user", req.message, userId)
+    await save_message(pool, "user", req.message, req.userId)
 
     history = await fetch_history(pool, userId)
 
