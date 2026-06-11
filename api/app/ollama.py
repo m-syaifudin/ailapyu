@@ -53,4 +53,4 @@ async def chat_completion(messages):
                 content = delta.get("content")
 
                 if content:
-                    yield content + "\n"
+                    yield content

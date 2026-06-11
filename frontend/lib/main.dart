@@ -85,7 +85,7 @@ class _ChatHomeScreenState extends State<ChatHomeScreen> {
 
       response.stream
         .transform(utf8.decoder)   
-        .transform(const LineSplitter()) 
+        //.transform(const LineSplitter()) 
         .listen(
           (line) {            
             if (line.isNotEmpty) {
