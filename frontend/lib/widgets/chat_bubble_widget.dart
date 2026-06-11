@@ -40,7 +40,7 @@ class ChatBubble extends StatelessWidget {
             ),
           ),
           child: !message.isUser ? 
-            MarkdownBlock( // reply from AI
+            MarkdownBlock( // reply from AI                  
                   data: message.text,
                   config: MarkdownConfig(
                     configs: [
@@ -63,11 +63,24 @@ class ChatBubble extends StatelessWidget {
                       
                       // code block ``` 
                       PreConfig(
+                        padding: const EdgeInsets.all(14),
+                        margin: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: Colors.grey[900],
+                          color: Colors.grey[900], // Kotak hitam untuk kodingan
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        //theme: ordered_by_theme, // Mengikuti tema bawaan highlight kode
+                        textStyle: const TextStyle(
+                          color: Color(0xFFA6E22E), // Warna teks kodingan hijau terang
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                        ),
+                        // Menggunakan properti 'wrapper' yang valid untuk membuat scroll horizontal
+                        wrapper: (child, code, language) {
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: child,
+                          );
+                        },
                       ),                    
 
                     ],
