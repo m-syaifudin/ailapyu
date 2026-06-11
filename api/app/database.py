@@ -28,10 +28,10 @@ async def fetch_history(pool: asyncpg.Pool, userId: str) -> list[dict]:
                 FROM messages
                 WHERE user_id = $1
                 ORDER BY created_at DESC
-                LIMIT $1
+                LIMIT $2
             ) sub
             ORDER BY created_at ASC
-        """, HISTORY_LIMIT)
+        """, userId, HISTORY_LIMIT)
     return [{"role": r["role"], "content": r["content"]} for r in rows]
 
 
