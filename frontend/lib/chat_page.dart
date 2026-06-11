@@ -70,7 +70,7 @@ class _ChatPageState extends State<ChatPage> {
         return;
       }
 
-      response.stream
+      _streamSubscription = response.stream
         .transform(utf8.decoder)   
         //.transform(const LineSplitter()) 
         .listen(
