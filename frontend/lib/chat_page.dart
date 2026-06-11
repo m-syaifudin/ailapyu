@@ -183,15 +183,17 @@ class _ChatPageState extends State<ChatPage> {
                       //(KeyDownEvent)
                       if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
 
-                        if (event.deviceType == KeyEventDeviceType.keyboard) {
-                          return KeyEventResult.ignored; 
-                        }
-                        
                         // 1. (Shift + Enter)
                         if (HardwareKeyboard.instance.isShiftPressed) {
                           // newline
                           return KeyEventResult.ignored; 
                         }
+
+                        // 2. Enter android enter
+                        if (event.deviceType != KeyEventDeviceType.keyboard) {
+                          return KeyEventResult.ignored; 
+                        }                     
+                        
                         
                         // 2. Enter
                         if (_messageController.text.trim().isNotEmpty) {
