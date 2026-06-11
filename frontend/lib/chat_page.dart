@@ -32,12 +32,14 @@ class _ChatPageState extends State<ChatPage> {
   StreamSubscription<String>? _streamSubscription;
   http.Client? _currentClient;
   bool _isLoading = false;
-  final Map<String, String> aiMessage = {'sender': 'ai', 'text': ''};
+  
 
   Future<void> askQuestion() async {
     final userText = _messageController.text.trim();  
     if (userText.isEmpty) return;
     _messageController.clear();
+
+    final Map<String, String> aiMessage = {'sender': 'ai', 'text': ''};
     
     
 
@@ -117,8 +119,7 @@ class _ChatPageState extends State<ChatPage> {
   if (_isLoading) {
     setState(() {
       _isLoading = false;
-      // Optional: Add a visual indicator that it was cut off
-      aiMessage['text'] = '(Interrupted)';
+      // Optional: Add a visual indicator that it was cut off      
     });
     _cleanup();
   }
