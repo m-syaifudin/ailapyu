@@ -44,7 +44,7 @@ async def chat(req: ChatRequest, request: Request):
             full_reply += chunk
             yield chunk          
 
-        await save_message(pool, "assistant", full_reply)
+        await save_message(pool, "assistant", full_reply, req.userId)
 
         # return ChatResponse(reply=reply)
 
