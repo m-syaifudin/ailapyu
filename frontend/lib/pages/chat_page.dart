@@ -131,7 +131,8 @@ class _ChatPageState extends State<ChatPage> {
 
   void stopGeneration() {
     if (_isLoading) {
-      _cleanup();
+      final Map<String, String> aiMessage = {'sender': 'ai', 'text': ''};
+      _handleFailure(aiMessage, 'Generation stopped before response.');
     }
   }
 
