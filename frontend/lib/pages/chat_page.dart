@@ -110,17 +110,26 @@ class _ChatPageState extends State<ChatPage> {
 
   void _handleFailure(Map<String, String> aiMessage, String defaultErrorText) {
 
-  setState(() {
-    _isLoading = false;
+    setState(() {
+      _isLoading = false;
 
-    _messages.removeLast();
-    final Map<String, String> aiMessage = {'sender': 'ai', 'text': defaultErrorText}; 
-    _messages.add(aiMessage);    
-  });
-  
-  _cleanup();
-  WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-}
+      final lastMessage = _messages.last;
+      final isAi = lastMessage['sender'] == 'ai';
+      final text = lastMessage['text'] ?? '';
+
+      if(isAi && text.isEmpty){
+        _messages.removeLast();
+        final Map<String, String> aiMessage = {'sender': 'ai', 'text': defaultErrorText}; 
+        _messages.add(aiMessage); 
+      }
+
+        
+    });
+    
+    
+    _cleanup();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+  }
 
   void stopGeneration() {
     if (_isLoading) {
