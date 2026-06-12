@@ -49,7 +49,7 @@ async def chat(req: ChatRequest, request: Request):
 
             # return ChatResponse(reply=reply)
 
-        except asyncio.CancelledError:
+        except asyncpg.CancelledError:
             print(f"Chat interrupted by user {req.userId}. Assistant response discarded.")
             raise    
 
