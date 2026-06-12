@@ -118,16 +118,7 @@ class _ChatPageState extends State<ChatPage> {
   void stopGeneration() {
     if (_isLoading) {
       setState(() {
-        _isLoading = false;
-
-        if (_messages.isNotEmpty && 
-            _messages.last['sender'] == 'ai' && 
-            (_messages.last['text'] == null || _messages.last['text']!.isEmpty)) {
-          _messages.removeLast();
-        }
-             
-        final Map<String, String> stopMessage = {'sender': 'ai', 'text': 'Generation stopped before response.'};
-        _messages.add(stopMessage);
+        _isLoading = false;      
       });
       _cleanup();
     }
