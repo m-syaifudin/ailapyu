@@ -117,6 +117,9 @@ class _ChatPageState extends State<ChatPage> {
 
   void stopGeneration() {
     if (_isLoading) {
+      setState(() {
+        _isLoading = false;        
+      });
       _cleanup();
     }
   }
