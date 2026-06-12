@@ -17,16 +17,17 @@ services:
     container_name: ailapyu_ollama
     restart: unless-stopped
     environment:
-      OLLAMA_HOST: "${OLLAMA_HOST:-0.0.0.0}"
-      OLLAMA_NUM_PARALLEL: "${OLLAMA_NUM_PARALLEL:-1000}"
-      OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS:-1}"
+      OLLAMA_HOST: "${OLLAMA_HOST}"
+      OLLAMA_NUM_PARALLEL: "${OLLAMA_NUM_PARALLEL}"
+      OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS}"      
+      OLLAMA_NUM_THREADS: "${OLLAMA_NUM_THREADS}"
     volumes:
-      - ${OLLAMA_VOLUME:-ollama_data}:/root/.ollama
+      - ${OLLAMA_VOLUME}:/root/.ollama
     deploy:
       resources:
         limits:
-          memory: "${OLLAMA_MEMORY_LIMIT:-3g}"
-          cpus:   "${OLLAMA_CPU_LIMIT:-1.8}"
+          memory: "${OLLAMA_MEMORY_LIMIT}"
+          cpus:   "${OLLAMA_CPU_LIMIT}"
     networks:
       - ailapyu_net
 
@@ -41,8 +42,8 @@ services:
       - |
         echo '>>> Waiting for Ollama...'
         until ollama list > /dev/null 2>&1; do sleep 2; done
-        echo '>>> Pulling model: ${DEFAULT_MODEL:-llama3.2:3b}...'
-        ollama pull ${DEFAULT_MODEL:-llama3.2:3b}
+        echo '>>> Pulling model: ${DEFAULT_MODEL}...'
+        ollama pull ${DEFAULT_MODEL}
         echo '>>> Model ready.'
     environment:
       OLLAMA_HOST: "${OLLAMA_INTERNAL_URL}"
@@ -94,7 +95,6 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      # This pulls DOMAIN_NAME from your host's .env file and passes it to Caddy
       DOMAIN_NAME: "${DOMAIN_NAME}"
     volumes:
       - caddy_data:/data
@@ -104,7 +104,7 @@ services:
 volumes:
   pg_data:
   ollama_data:
-    name: "${OLLAMA_VOLUME:-ollama_data}"
+    name: "${OLLAMA_VOLUME}"
   caddy_data:
   caddy_config:
 

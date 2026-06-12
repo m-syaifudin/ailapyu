@@ -1,11 +1,5 @@
 import os
 
-# OLLAMA_HOST   = os.environ.get("OLLAMA_INTERNAL_URL", "")
-# OLLAMA_MODEL  = os.environ.get("OLLAMA_MODEL", "")
-# DATABASE_URL  = os.environ.get("DATABASE_URL", "")
-# SYSTEM_PROMPT = os.environ.get("SYSTEM_PROMPT", "")
-# HISTORY_LIMIT = int(os.environ.get("HISTORY_LIMIT", 5))
-
 OLLAMA_HOST = os.environ.get("OLLAMA_INTERNAL_URL")
 if not OLLAMA_HOST:
     raise ValueError("OLLAMA_INTERNAL_URL is not set")
