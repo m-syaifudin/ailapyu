@@ -84,7 +84,14 @@ class _ChatPageState extends State<ChatPage> {
             }
           },
           onDone: () {
-            setState(() => _isLoading = false);
+            setState(() {
+               _isLoading = false;
+
+               if (aiMessage['text']!.isEmpty) {
+                  aiMessage['text'] = 'Generation stopped before response.';
+                }
+                        
+              });
             _cleanup();
             WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
           },
@@ -121,7 +128,9 @@ class _ChatPageState extends State<ChatPage> {
       }
     } else {
       // It was a real network drop/server crash
-      aiMessage['text'] = defaultErrorText;
+      if (aiMessage['text']!.isEmpty) {
+        aiMessage['text'] = defaultErrorText;
+      }
     }
   });
   
