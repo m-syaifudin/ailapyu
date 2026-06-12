@@ -117,18 +117,6 @@ class _ChatPageState extends State<ChatPage> {
 
   void stopGeneration() {
     if (_isLoading) {
-      setState(() {
-        _isLoading = false;
-
-        if (_messages.isNotEmpty && 
-            _messages.last['sender'] == 'ai' && 
-            (_messages.last['text'] == null || _messages.last['text']!.isEmpty)) {
-          _messages.removeLast();
-        }
-             
-        final Map<String, String> stopMessage = {'sender': 'ai', 'text': 'Generation stopped before response.'};
-        _messages.add(stopMessage);
-      });
       _cleanup();
     }
   }
@@ -167,6 +155,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
       body: Column(
         children: <Widget>[
+          
           // 1. CHAT MESSAGE AREA
           Expanded(
             child: ListView.builder(
@@ -200,6 +189,7 @@ class _ChatPageState extends State<ChatPage> {
               },
             ),
           ),
+
           // 2. MESSAGE INPUT BAR
           Container(
             padding: const EdgeInsets.all(10),
@@ -266,6 +256,7 @@ class _ChatPageState extends State<ChatPage> {
               ],
             ),
           ),
+        
         ],
       ),
     );
