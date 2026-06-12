@@ -8,7 +8,6 @@ from pydantic import BaseModel
 from app.config import SYSTEM_PROMPT
 from app.database import fetch_history, save_message
 from app.ollama import chat_completion
-from app.routers import check_prompt_guardrails
 
 router = APIRouter()
 
@@ -28,7 +27,7 @@ async def health():
 @router.post("/chat")
 async def chat(req: ChatRequest, request: Request):
     await check_prompt_guardrails(req.message)
-    
+
     pool: asyncpg.Pool = request.app.state.pool
 
     await save_message(pool, "user", req.message, req.userId)
