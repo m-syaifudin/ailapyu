@@ -39,9 +39,7 @@ class _ChatPageState extends State<ChatPage> {
     if (userText.isEmpty) return;
     _messageController.clear();
 
-    final Map<String, String> aiMessage = {'sender': 'ai', 'text': ''};
-    
-    
+    final Map<String, String> aiMessage = {'sender': 'ai', 'text': ''}; 
 
     setState(() {
       _isLoading = true;
@@ -85,12 +83,7 @@ class _ChatPageState extends State<ChatPage> {
           },
           onDone: () {
             setState(() {
-               _isLoading = false;
-
-               if (aiMessage['text']!.isEmpty) {
-                  aiMessage['text'] = 'Generation stopped before response.';
-                }
-                        
+               _isLoading = false;   
               });
             _cleanup();
             WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
@@ -114,24 +107,15 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+
   void _handleFailure(Map<String, String> aiMessage, String defaultErrorText) {
+
   setState(() {
     _isLoading = false;
-    
-    // IF _currentClient is null, it means stopGeneration() was clicked 
-    // and _cleanup() was called before this error fired!
-    if (_currentClient == null) {
-      if (aiMessage['text']!.isEmpty) {
-        aiMessage['text'] = 'Generation stopped before response.';
-      } else {
-        aiMessage['text'] = '${aiMessage['text']}\n[Generation stopped by user]';
-      }
-    } else {
-      // It was a real network drop/server crash
-      if (aiMessage['text']!.isEmpty) {
-        aiMessage['text'] = defaultErrorText;
-      }
-    }
+
+    _messages.removeLast();
+    final Map<String, String> aiMessage = {'sender': 'ai', 'text': defaultErrorText}; 
+    _messages.add(aiMessage);    
   });
   
   _cleanup();
@@ -141,7 +125,7 @@ class _ChatPageState extends State<ChatPage> {
   void stopGeneration() {
     if (_isLoading) {
       final Map<String, String> aiMessage = {'sender': 'ai', 'text': ''};
-      _handleFailure(aiMessage, 'Generation stopped before response.');
+      _handleFailure(aiMessage, 'Cancelled by user.');
     }
   }
 
