@@ -89,19 +89,11 @@ class _ChatPageState extends State<ChatPage> {
             WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
           },
           onError: (error) {
-            setState(() {
-              aiMessage['text'] = 'Stream Error: network error';
-              _isLoading = false;
-            });
-            _cleanup();
+            _handleFailure(aiMessage, 'Stream Error: $error');
           }
         );
     } catch (e) {
-      setState(() {
-        aiMessage['text'] = 'Connection Failed: $e';
-        _isLoading = false;
-      });
-      _cleanup();
+      _handleFailure(aiMessage, 'Stream Error: $e');
     }
   }
 
@@ -115,11 +107,30 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  void _handleFailure(Map<String, String> aiMessage, String defaultErrorText) {
+  setState(() {
+    _isLoading = false;
+    
+    // IF _currentClient is null, it means stopGeneration() was clicked 
+    // and _cleanup() was called before this error fired!
+    if (_currentClient == null) {
+      if (aiMessage['text']!.isEmpty) {
+        aiMessage['text'] = 'Generation stopped before response.';
+      } else {
+        aiMessage['text'] = '${aiMessage['text']}\n[Generation stopped by user]';
+      }
+    } else {
+      // It was a real network drop/server crash
+      aiMessage['text'] = defaultErrorText;
+    }
+  });
+  
+  _cleanup();
+  WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+}
+
   void stopGeneration() {
     if (_isLoading) {
-      setState(() {
-        _isLoading = false;      
-      });
       _cleanup();
     }
   }
