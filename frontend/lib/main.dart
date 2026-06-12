@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frontend/chat_page.dart';
-import 'package:frontend/login_page.dart';
+import 'package:frontend/pages/chat_page.dart';
+import 'package:frontend/pages/login_page.dart';
 import 'package:frontend/services/api_config.dart';
 import 'package:frontend/widgets/thinking_indicator.dart';
 import 'package:http/http.dart' as http;
