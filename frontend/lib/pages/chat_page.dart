@@ -116,24 +116,30 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void stopGeneration() {
-  if (_isLoading) {
-    setState(() {
-      _isLoading = false;
-      // Optional: Add a visual indicator that it was cut off     
-      final Map<String, String> stopMessage = {'sender': 'ai', 'text': 'Generation stopped before response.'};
-      _messages.add(stopMessage);
-    });
-    _cleanup();
+    if (_isLoading) {
+      setState(() {
+        _isLoading = false;
+
+        if (_messages.isNotEmpty && 
+            _messages.last['sender'] == 'ai' && 
+            (_messages.last['text'] == null || _messages.last['text']!.isEmpty)) {
+          _messages.removeLast();
+        }
+             
+        final Map<String, String> stopMessage = {'sender': 'ai', 'text': 'Generation stopped before response.'};
+        _messages.add(stopMessage);
+      });
+      _cleanup();
+    }
   }
-}
 
   void _cleanup() {
-  _streamSubscription?.cancel();
-  _streamSubscription = null;
-  
-  _currentClient?.close();
-  _currentClient = null;
-}
+    _streamSubscription?.cancel();
+    _streamSubscription = null;
+    
+    _currentClient?.close();
+    _currentClient = null;
+  }
     
   @override
   void dispose() {
@@ -180,8 +186,7 @@ class _ChatPageState extends State<ChatPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   // ChatBubble is a custom widget defined below
                   child: 
-                    !message.isUser && text.isEmpty ?
-                    
+                    !message.isUser && text.isEmpty ?                    
                        const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -190,8 +195,6 @@ class _ChatPageState extends State<ChatPage> {
                             ThinkingIndicator(), 
                           ],
                         )
-                      
-                    
                     : ChatBubble(message: message),
                 );
               },
