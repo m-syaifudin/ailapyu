@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app.config import SYSTEM_PROMPT
 from app.database import fetch_history, save_message
 from app.ollama import chat_completion
+from app.routers.guardrail import check_prompt_guardrails
 
 router = APIRouter()
 
