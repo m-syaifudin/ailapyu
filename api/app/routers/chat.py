@@ -1,5 +1,6 @@
 import json
 import asyncpg
+import asyncio
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -49,9 +50,13 @@ async def chat(req: ChatRequest, request: Request):
 
             # return ChatResponse(reply=reply)
 
-        except asyncpg.CancelledError:
+        except asyncio.CancelledError:
             print(f"Chat interrupted by user {req.userId}. Assistant response discarded.")
             raise    
+
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            raise
 
     return StreamingResponse(
         generate(),
