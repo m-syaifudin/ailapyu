@@ -20,13 +20,14 @@ services:
       OLLAMA_HOST: "${OLLAMA_HOST}"
       OLLAMA_NUM_PARALLEL: "${OLLAMA_NUM_PARALLEL}"
       OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS}"    
+      # OLLAMA_NUM_THREADS: "${OLLAMA_NUM_THREADS}"
     volumes:
-      - ${OLLAMA_VOLUME}:/root/.ollama
+      - ollama_data:/root/.ollama
     deploy:
       resources:
         limits:
           memory: "${OLLAMA_MEMORY_LIMIT}"
-          cpus:   "${OLLAMA_CPU_LIMIT}"
+          cpus: "${OLLAMA_CPU_LIMIT}"
     networks:
       - ailapyu_net
 
@@ -63,6 +64,9 @@ services:
         condition: service_started
       ollama:
         condition: service_started
+      init-model:
+        condition: service_completed_successfully
+
     networks:
       - ailapyu_net
 
@@ -80,32 +84,31 @@ services:
     networks:
       - ailapyu_net
 
-  reverse-proxy:
-    build: ./proxy
-    image: caddy:alpine
-    container_name: ailapyu_proxy
+  nginx:
+    build:
+      context: ./proxy
+    container_name: ailapyu_nginx
     restart: unless-stopped
-    depends_on:
-      frontend:
-        condition: service_started
-    networks:
-      - ailapyu_net
+    env_file:
+      - .env
     ports:
       - "80:80"
       - "443:443"
-    environment:
-      DOMAIN_NAME: "${DOMAIN_NAME}"
     volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-    
+      - ./proxy/certbot:/etc/letsencrypt
+      - ./proxy/www:/var/www/certbot
+    depends_on:
+      frontend:
+          condition: service_started
+      api:
+        condition: service_started
+    networks:
+      - ailapyu_net
 
 volumes:
   pg_data:
   ollama_data:
     name: "${OLLAMA_VOLUME}"
-  caddy_data:
-  caddy_config:
 
 networks:
   ailapyu_net:
