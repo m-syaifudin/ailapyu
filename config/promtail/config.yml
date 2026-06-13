@@ -15,12 +15,12 @@ scrape_configs:
         refresh_interval: 5s
 
     relabel_configs:
-      # pakai nama container sebagai label "service"
+      # use container name as label "service"
       - source_labels: [__meta_docker_container_name]
         regex: /(.*)
         target_label: service
 
-      # tambah label nama image
+      # add label image name
       - source_labels: [__meta_docker_container_image]
         target_label: image
 

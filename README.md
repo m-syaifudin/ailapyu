@@ -12,8 +12,10 @@ https://syaifudinprojects.my.id/
 ## Stage 2
 - [x] multiple session chat with ai
 - [x] interupt chat
-- [x] add nginx
 
-## Stage 2
-- [] add observability stack - if you test now maybe the website not working
+## Stage 3
+- [X] add observability stack - Loki,Grafana,Prometheus
+
+## Stage 4
+- [] 
 
