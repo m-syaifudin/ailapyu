@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  # CPU, RAM, Disk, Network — host/VPS level
+  - job_name: node-exporter
+    static_configs:
+      - targets: ['node_exporter:9100']
+        labels:
+          instance: vps
+
+  # CPU & RAM per container (FastAPI, Nginx, PostgreSQL, Ollama, dll)
+  - job_name: cadvisor
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          instance: vps
+
+  # Prometheus self-monitoring
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']

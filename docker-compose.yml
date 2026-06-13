@@ -10,7 +10,12 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     networks:
-      - ailapyu_net
+      - app
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   ollama:
     image: ollama/ollama:latest
@@ -29,7 +34,12 @@ services:
           memory: "${OLLAMA_MEMORY_LIMIT}"
           cpus: "${OLLAMA_CPU_LIMIT}"
     networks:
-      - ailapyu_net
+      - app
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "10"
 
   init-model:
     image: ollama/ollama:latest
@@ -48,7 +58,7 @@ services:
     environment:
       OLLAMA_HOST: "${OLLAMA_INTERNAL_URL}"
     networks:
-      - ailapyu_net
+      - app
 
   api:
     build:
@@ -66,9 +76,13 @@ services:
         condition: service_started
       init-model:
         condition: service_completed_successfully
-
     networks:
-      - ailapyu_net
+      - app
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     build:
@@ -82,7 +96,12 @@ services:
       api:
         condition: service_started
     networks:
-      - ailapyu_net
+      - app
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
     build:
@@ -103,13 +122,114 @@ services:
       api:
         condition: service_started
     networks:
-      - ailapyu_net
+      - app
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  promtail:
+    image: grafana/promtail:2.9.10
+    container_name: promtail
+    restart: unless-stopped
+    volumes:
+      - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - promtail_data:/tmp/promtail
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+    user: root
+
+  loki:
+    image: grafana/loki:2.9.10
+    container_name: loki
+    restart: unless-stopped
+    volumes:
+      - ./config/loki/config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/config.yml
+    user: "10001:10001"
+    networks:
+      - monitoring
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - monitoring
+
+  node_exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node_exporter
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:v2.53.2
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:11.1.4
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - loki
+      - prometheus
+    networks:
+      - monitoring
 
 volumes:
   pg_data:
   ollama_data:
     name: "${OLLAMA_VOLUME}"
+  loki_data:
+  promtail_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
-  ailapyu_net:
+  app:
+    driver: bridge
+  monitoring:
     driver: bridge
