@@ -21,7 +21,7 @@ app = FastAPI(title="ailapyu", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["{DOMAIN_HTTPS}"],
+    allow_origins=["${DOMAIN_HTTPS}"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
