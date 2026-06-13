@@ -1,8 +1,8 @@
 import os
 
-OLLAMA_HOST = os.environ.get("OLLAMA_INTERNAL_URL")
-if not OLLAMA_HOST:
-    raise ValueError("OLLAMA_INTERNAL_URL is not set")
+LOCAL_HOST = os.environ.get("LOCAL_HOST")
+if not LOCAL_HOST:
+    raise ValueError("LOCAL_HOST is not set")
 
 OLLAMA_MODEL = os.environ.get("DEFAULT_MODEL")
 if not OLLAMA_MODEL:

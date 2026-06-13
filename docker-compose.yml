@@ -17,7 +17,7 @@ services:
     container_name: ailapyu_ollama
     restart: unless-stopped
     environment:
-      OLLAMA_HOST: "${OLLAMA_HOST}"
+      OLLAMA_HOST: "${LOCAL_HOST}"
       OLLAMA_NUM_PARALLEL: "${OLLAMA_NUM_PARALLEL}"
       OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS}"    
       # OLLAMA_NUM_THREADS: "${OLLAMA_NUM_THREADS}"
