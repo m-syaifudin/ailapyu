@@ -143,6 +143,7 @@ services:
       - loki
     networks:
       - monitoring
+      - app
     user: root
 
   loki:
