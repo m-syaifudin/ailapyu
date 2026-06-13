@@ -131,6 +131,7 @@ services:
     user: "10001:10001"
     networks:
       - monitoring
+      - app
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
@@ -145,6 +146,7 @@ services:
       - /dev/disk/:/dev/disk:ro
     networks:
       - monitoring
+      - app
 
   node_exporter:
     image: prom/node-exporter:v1.8.2
@@ -162,6 +164,7 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
       - monitoring
+      - app
 
   prometheus:
     image: prom/prometheus:v2.53.2
@@ -176,6 +179,7 @@ services:
       - '--storage.tsdb.retention.time=30d'
     networks:
       - monitoring
+      - app
 
   grafana:
     image: grafana/grafana:11.1.4
@@ -193,6 +197,7 @@ services:
       - prometheus
     networks:
       - monitoring
+      - app
 
   nginx:
     build:

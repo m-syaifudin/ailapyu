@@ -69,7 +69,7 @@ server {
     }
 
     # GRAFANA
-    location /grafana/ {
+    location /grafana {
         proxy_pass http://grafana:3000;
 
         # Proxy headers
