@@ -6,7 +6,7 @@ from app.config import OLLAMA_HOST, OLLAMA_MODEL
 async def chat_completion(messages):
     url = f"{OLLAMA_HOST}/v1/chat/completions"
 
-    async with httpx.AsyncClient(timeout=60) as client:
+    async with httpx.AsyncClient(timeout=None) as client:
         async with client.stream(
             "POST",
             url,
