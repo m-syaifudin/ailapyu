@@ -1,10 +1,10 @@
 import httpx
 import json
 from fastapi import HTTPException
-from app.config import LOCAL_HOST, OLLAMA_MODEL
+from app.config import OLLAMA_INTERNAL_URL, OLLAMA_MODEL
 
 async def chat_completion(messages):
-    url = f"{LOCAL_HOST}/v1/chat/completions"
+    url = f"{OLLAMA_INTERNAL_URL}/v1/chat/completions"
 
     async with httpx.AsyncClient(timeout=None) as client:
         async with client.stream(
