@@ -23,3 +23,7 @@ if not HISTORY_LIMIT:
 DOMAIN_HTTPS = os.environ.get("DOMAIN_HTTPS")
 if not DOMAIN_HTTPS:
     raise ValueError("DOMAIN_HTTPS is not set")
+
+OLLAMA_INTERNAL_URL = os.environ.get("OLLAMA_INTERNAL_URL")
+if not OLLAMA_INTERNAL_URL:
+    raise ValueError("OLLAMA_INTERNAL_URL is not set")
