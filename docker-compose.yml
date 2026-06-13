@@ -101,33 +101,7 @@ services:
       driver: json-file
       options:
         max-size: "10m"
-        max-file: "3"
-
-  nginx:
-    build:
-      context: ./proxy
-    container_name: nginx
-    restart: unless-stopped
-    env_file:
-      - .env
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./proxy/certbot:/etc/letsencrypt
-      - ./proxy/www:/var/www/certbot
-    depends_on:
-      frontend:
-          condition: service_started
-      api:
-        condition: service_started
-    networks:
-      - app
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+        max-file: "3" 
 
   promtail:
     image: grafana/promtail:2.9.10
@@ -219,6 +193,34 @@ services:
       - prometheus
     networks:
       - monitoring
+
+  nginx:
+    build:
+      context: ./proxy
+    container_name: nginx
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./proxy/certbot:/etc/letsencrypt
+      - ./proxy/www:/var/www/certbot
+    depends_on:
+      frontend:
+          condition: service_started
+      api:
+        condition: service_started
+      grafana:
+        condition: service_started
+    networks:
+      - app
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   pg_data:
