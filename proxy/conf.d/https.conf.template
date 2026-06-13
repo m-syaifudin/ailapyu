@@ -35,7 +35,7 @@ server {
     }
 
     location /api {
-        proxy_pass http://api:8080;
+        proxy_pass http://api:8000;
 
         # FIX #3: proxy headers
         proxy_set_header Host              $host;
