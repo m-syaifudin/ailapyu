@@ -5,13 +5,11 @@ The project pairs a Flutter Web frontend with a FastAPI backend, powered by a lo
 ## Demo app
 https://syaifudinprojects.my.id/
 
-## Architecture Overview
-User Browser -> Flutter Web -> FastAPI Backend -> Ollama LLM / PostgreSQL DB
-
 ## Stage 1
-- setup environment
-- chat with ai 
+- [x] setup environment: docker, ollama, Fast API, PostgreSQL
+- [x] chat with ai 
 
 ## Stage 2
-- multiple id /session chat with ai
-- interupt chat
+- [x] multiple session chat with ai
+- [x] interupt chat
+- [x] add nginx
