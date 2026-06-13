@@ -20,6 +20,6 @@ HISTORY_LIMIT = int(os.environ.get("HISTORY_LIMIT"))
 if not HISTORY_LIMIT:
     raise ValueError("HISTORY_LIMIT is not set")
 
-DOMAIN_HTTPS = int(os.environ.get("DOMAIN_HTTPS"))
+DOMAIN_HTTPS = os.environ.get("DOMAIN_HTTPS")
 if not DOMAIN_HTTPS:
     raise ValueError("DOMAIN_HTTPS is not set")
