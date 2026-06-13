@@ -3,8 +3,10 @@ from fastapi import FastAPI
 
 from app.database import create_pool, init_db
 from app.routers.chat import router
+from app.config import DOMAIN_HTTPS
 
 from fastapi.middleware.cors import CORSMiddleware
+
 
 
 @asynccontextmanager
@@ -19,7 +21,7 @@ app = FastAPI(title="ailapyu", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["{DOMAIN_HTTPS}"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
