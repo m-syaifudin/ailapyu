@@ -25,7 +25,7 @@ server {
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
     location / {
-        proxy_pass http://frontend:3000;
+        proxy_pass http://frontend:80;
 
         # FIX #3: proxy headers so upstream sees real client info
         proxy_set_header Host              $host;
