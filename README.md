@@ -13,3 +13,7 @@ https://syaifudinprojects.my.id/
 - [x] multiple session chat with ai
 - [x] interupt chat
 - [x] add nginx
+
+## Stage 2
+- [] add observability stack - if you test now maybe the website not working
+
